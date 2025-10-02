@@ -1,0 +1,28 @@
+name: Build VSIX
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore & Build
+      run: |
+        msbuild Abs.Ssms.TabColoring.sln /t:Restore,Build /p:Configuration=Release /m
+
+    - name: Upload VSIX artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Abs.Ssms.TabColoring_vsix
+        path: |
+          **/*.vsix
