@@ -16,7 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- OK, to trzyma zgodne wersje zależności (w tym Text.UI.Wpf) -->
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.9.37000" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.9.3254" PrivateAssets="all" />
   </ItemGroup>
@@ -27,6 +26,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
 
   <ItemGroup>

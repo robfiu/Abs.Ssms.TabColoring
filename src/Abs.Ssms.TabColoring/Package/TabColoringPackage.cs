@@ -16,7 +16,7 @@ namespace Abs.Ssms.TabColoring.Package
   [InstalledProductRegistration("ABS SSMS Tab Coloring", "Colors editor tabs by connection", "0.1.0")]
   [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)]
   [ProvideOptionPage(typeof(TabColoringOptionsPage), "ABS", "Tab Coloring", 0, 0, true)]
-  [ProvideProfile(typeof(TabColoringOptionsPage), "ABS", "Tab Coloring", 0, 0, isMachineLocal: true)]
+  [ProvideProfile(typeof(TabColoringOptionsPage), "ABS", "Tab Coloring", 0, 0)]
   [Guid(PackageGuidString)]
   public sealed class TabColoringPackage : AsyncPackage
   {
