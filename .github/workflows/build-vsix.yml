@@ -22,12 +22,18 @@ jobs:
     - name: Build (Release) + BINLOG
       run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:m /bl:msbuild.binlog /p:GenerateVsixContainer=true /p:CreateVsixContainer=true
 
-    - name: List VSIX paths (debug)
+    - name: Show outputs (debug)
       shell: pwsh
       run: |
-        Write-Host "Searching for VSIX files..."
-        Get-ChildItem -Path . -Recurse -Filter *.vsix | ForEach-Object {
+        Write-Host "=== DIR bin\Release ==="
+        Get-ChildItem -Path src/Abs.Ssms.TabColoring/bin/Release -Recurse -ErrorAction SilentlyContinue | Format-Table FullName, Length
+        Write-Host "=== Find *.vsix anywhere ==="
+        Get-ChildItem -Path . -Recurse -Filter *.vsix -ErrorAction SilentlyContinue | ForEach-Object {
           Write-Host "FOUND VSIX: $($_.FullName)"
+        }
+        Write-Host "=== Find *.pkgdef (diagnostic) ==="
+        Get-ChildItem -Path . -Recurse -Filter *.pkgdef -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "FOUND PKGDEF: $($_.FullName)"
         }
 
     - name: Upload VSIX + binlog
@@ -36,4 +42,6 @@ jobs:
         name: vsix-and-logs
         path: |
           **/*.vsix
+          **/*.pkgdef
           msbuild.binlog
+

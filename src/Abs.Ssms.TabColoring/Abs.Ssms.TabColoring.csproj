@@ -13,6 +13,7 @@
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <UseCodebase>true</UseCodebase>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<VsixOutputPath>$(OutputPath)</VsixOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,6 +34,6 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-    <VSIXSourceItem Include="source.extension.vsixmanifest" />
+    <VsixManifest Include="source.extension.vsixmanifest" />
   </ItemGroup>
 </Project>
