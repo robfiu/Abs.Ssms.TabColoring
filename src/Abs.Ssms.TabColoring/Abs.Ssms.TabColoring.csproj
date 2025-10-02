@@ -5,11 +5,12 @@
     <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
     <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
 
-    <!-- VSIX packaging -->
-    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
-    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
-    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<!-- KLUCZOWE dla VSIX -->
+	<GenerateVsixContainer>true</GenerateVsixContainer>
+	<GeneratePkgDefFile>true</GeneratePkgDefFile>
+	<IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+	<CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+	<UseCodebase>true</UseCodebase>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,5 +30,6 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
+	<VSIXSourceItem Include="source.extension.vsixmanifest" />	
   </ItemGroup>
 </Project>
