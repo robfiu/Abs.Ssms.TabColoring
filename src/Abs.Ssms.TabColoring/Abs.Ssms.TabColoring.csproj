@@ -6,7 +6,6 @@
     <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
     <UseWPF>true</UseWPF>
 
-    <!-- KLUCZOWE dla VSIX -->
     <GenerateVsixContainer>true</GenerateVsixContainer>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -17,11 +16,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.9.361" ExcludeAssets="runtime" />
+    <!-- OK, to trzyma zgodne wersje zależności (w tym Text.UI.Wpf) -->
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.9.37000" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.9.3254" PrivateAssets="all" />
-    <!-- Te dwie referencje czasem ułatwiają rozwiązywanie typów edytora/WPF -->
-    <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf" Version="17.0.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.VisualStudio.Editor" Version="17.0.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
