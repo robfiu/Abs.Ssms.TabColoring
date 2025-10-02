@@ -3,11 +3,9 @@ using System.ComponentModel.Composition;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Editor;
 using Abs.Ssms.TabColoring.Services;
+using Microsoft.VisualStudio.Shell;
 
 namespace Abs.Ssms.TabColoring.UI.EditorAdornment
 {
@@ -17,7 +15,7 @@ namespace Abs.Ssms.TabColoring.UI.EditorAdornment
   internal sealed class TopStripeAdornmentTextViewCreationListener : IWpfTextViewCreationListener
   {
     [Import]
-    internal IVsEditorAdaptersFactoryService AdaptersFactory = null;
+    internal ITextDocumentFactoryService DocumentFactory = null;
 
     public void TextViewCreated(IWpfTextView textView)
     {
@@ -25,13 +23,19 @@ namespace Abs.Ssms.TabColoring.UI.EditorAdornment
 
       var adornment = new TopStripeAdornment(textView);
 
-      var vsTextView = AdaptersFactory.GetViewAdapter(textView);
-      var frame = Microsoft.VisualStudio.Shell.VsShellUtilities.GetWindowFrame(vsTextView) as IVsWindowFrame;
-      var key = ColorRegistry.GetFrameKey(frame);
+      // Use moniker (file path) as the key instead of IVsWindowFrame
+      string key = null;
+      ITextDocument doc;
+      if (DocumentFactory != null && DocumentFactory.TryGetTextDocument(textView.TextBuffer, out doc) && doc != null)
+      {
+        if (!string.IsNullOrEmpty(doc.FilePath)) key = "mk:" + doc.FilePath;
+      }
+
       if (key != null)
       {
         Color c;
         if (ColorRegistry.TryGetColor(key, out c)) adornment.SetColor(c);
+
         ColorRegistry.ColorChanged += (sender, changedKey) =>
         {
           if (key == changedKey)
