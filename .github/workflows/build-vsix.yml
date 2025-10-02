@@ -16,15 +16,16 @@ jobs:
       with:
         msbuild-architecture: x64
 
-    - name: Restore
+    - name: NuGet restore (solution)
       run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m
 
-    - name: Build (Release)
-      run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /m /v:m /p:GenerateVsixContainer=true
+    - name: Build (Release) + BINLOG
+      run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:m /bl:msbuild.binlog /p:GenerateVsixContainer=true
 
-    - name: Upload VSIX artifact
+    - name: Upload artifacts (VSIX + binlog)
       uses: actions/upload-artifact@v4
       with:
-        name: Abs.Ssms.TabColoring_vsix
+        name: vsix-and-logs
         path: |
           **/bin/Release/*.vsix
+          msbuild.binlog
