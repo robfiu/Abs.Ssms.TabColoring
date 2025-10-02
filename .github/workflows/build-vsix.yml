@@ -11,17 +11,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    # Zapewnij MSBuild i Visual Studio 2022 z VSSDK
-    - name: Setup Visual Studio (VSSDK)
-      uses: microsoft/setup-visualstudio@v1
-      with:
-        vs-version: '>=17.9'
-        components: |
-          Microsoft.VisualStudio.Component.VSSDK
-          Microsoft.Component.MSBuild
-
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
 
     - name: Restore
       run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Forms;
 using Abs.Ssms.TabColoring.Model;
 using Abs.Ssms.TabColoring.Options;
-using System.Collections.Generic;
 using System.Windows.Media;
 
 namespace Abs.Ssms.TabColoring.Options
@@ -94,7 +93,7 @@ namespace Abs.Ssms.TabColoring.Options
       s.EnableTitlePrefix = chkTitlePrefix.Checked;
       s.TitlePrefix = txtPrefix.Text;
       s.UseRegex = chkRegex.Checked;
-      s.SetRules(_binding.ToList());
+      s.SetRules(_binding);
     }
   }
 }

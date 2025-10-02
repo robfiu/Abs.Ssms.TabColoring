@@ -15,7 +15,6 @@ namespace Abs.Ssms.TabColoring.Options
     public bool EnableTitlePrefix { get; set; } = true;
     public string TitlePrefix { get; set; } = "● ";
     public bool UseRegex { get; set; } = false;
-
     public string RulesSerialized { get; set; } = "prod|ServerOrDb|#E63946\nstage|ServerOrDb|#FCBF49\ndev|ServerOrDb|#457B9D";
 
     public List<Rule> GetRules()

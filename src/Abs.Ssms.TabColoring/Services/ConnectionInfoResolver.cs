@@ -33,7 +33,6 @@ namespace Abs.Ssms.TabColoring.Services
         }
       }
 
-      // TODO: advanced approach via SSMS services if available.
       return (null, null);
     }
   }
