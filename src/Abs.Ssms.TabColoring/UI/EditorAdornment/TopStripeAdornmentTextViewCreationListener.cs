@@ -26,11 +26,21 @@ namespace Abs.Ssms.TabColoring.UI.EditorAdornment
       var adornment = new TopStripeAdornment(textView);
 
       var vsTextView = AdaptersFactory.GetViewAdapter(textView);
-      var frame = VsShellUtilities.GetTextViewFrame(vsTextView) as IVsWindowFrame;
+      var frame = Microsoft.VisualStudio.Shell.VsShellUtilities.GetWindowFrame(vsTextView) as IVsWindowFrame;
       var key = ColorRegistry.GetFrameKey(frame);
-      if (key != null && ColorRegistry.TryGetColor(key, out Color c)) adornment.SetColor(c);
-
-      ColorRegistry.ColorChanged += (_, changedKey) => { if (key == changedKey && ColorRegistry.TryGetColor(key, out Color c2)) adornment.SetColor(c2); };
+      if (key != null)
+      {
+        Color c;
+        if (ColorRegistry.TryGetColor(key, out c)) adornment.SetColor(c);
+        ColorRegistry.ColorChanged += (sender, changedKey) =>
+        {
+          if (key == changedKey)
+          {
+            Color c2;
+            if (ColorRegistry.TryGetColor(key, out c2)) adornment.SetColor(c2);
+          }
+        };
+      }
     }
   }
 }

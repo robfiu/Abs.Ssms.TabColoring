@@ -15,7 +15,8 @@ namespace Abs.Ssms.TabColoring.UI
       ThreadHelper.ThrowIfNotOnUIThread();
       try
       {
-        if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_OwnerCaption, out object capObj) != VSConstants.S_OK || capObj is not string caption)
+        object capObj;
+        if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_OwnerCaption, out capObj) != VSConstants.S_OK || !(capObj is string caption))
           return false;
 
         foreach (Window w in Application.Current.Windows)
@@ -23,7 +24,8 @@ namespace Abs.Ssms.TabColoring.UI
           var tabItem = FindTabItemByHeader(w, caption);
           if (tabItem != null)
           {
-            if (tabItem.Background is SolidColorBrush b && b.Color == color) return true;
+            var b = tabItem.Background as SolidColorBrush;
+            if (b != null && b.Color == color) return true;
             tabItem.Background = new SolidColorBrush(color);
             tabItem.BorderBrush = new SolidColorBrush(color);
             return true;
@@ -38,7 +40,8 @@ namespace Abs.Ssms.TabColoring.UI
     {
       ThreadHelper.ThrowIfNotOnUIThread();
       if (string.IsNullOrEmpty(prefix)) return;
-      if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_OwnerCaption, out object capObj) == VSConstants.S_OK && capObj is string cap)
+      object capObj;
+      if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_OwnerCaption, out capObj) == VSConstants.S_OK && capObj is string cap)
       {
         if (!cap.StartsWith(prefix, StringComparison.Ordinal))
         {
@@ -54,7 +57,8 @@ namespace Abs.Ssms.TabColoring.UI
       for (int i = 0; i < count; i++)
       {
         var child = VisualTreeHelper.GetChild(root, i);
-        if (child is TabItem ti)
+        var ti = child as TabItem;
+        if (ti != null)
         {
           var text = ti.Header as string;
           if (!string.IsNullOrEmpty(text) && text.Contains(header)) return ti;

@@ -16,7 +16,6 @@ namespace Abs.Ssms.TabColoring.Package
   [InstalledProductRegistration("ABS SSMS Tab Coloring", "Colors editor tabs by connection", "0.1.0")]
   [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)]
   [ProvideOptionPage(typeof(TabColoringOptionsPage), "ABS", "Tab Coloring", 0, 0, true)]
-  // IMPORTANT: VS SDK 17.x expects 'isToolsOptionPage' (bool) as the last arg
   [ProvideProfile(typeof(TabColoringOptionsPage), "ABS", "Tab Coloring", 0, 0, isToolsOptionPage: true)]
   [Guid(PackageGuidString)]
   public sealed class TabColoringPackage : AsyncPackage
@@ -31,10 +30,11 @@ namespace Abs.Ssms.TabColoring.Package
 
       SettingsService.Initialize(this);
 
-      var shell = await GetServiceAsync(typeof(SVsUIShell)) as IVsUIShell;
-      var monitor = await GetServiceAsync(typeof(SVsUIShellMonitorSelection)) as IVsMonitorSelection;
+      var uiShell = await GetServiceAsync(typeof(SVsUIShell)) as IVsUIShell;
+      var vsShell = await GetServiceAsync(typeof(SVsShell)) as IVsShell;
+      var monitor = await GetServiceAsync(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
 
-      _manager = new DocumentTabColorManager(this, shell, monitor);
+      _manager = new DocumentTabColorManager(this, vsShell, uiShell, monitor);
       _manager.Hook();
 
       SettingsService.SettingsChanged += (_, __) => _manager.RefreshAllOpenFrames();

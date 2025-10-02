@@ -15,26 +15,30 @@ namespace Abs.Ssms.TabColoring.Services
   internal sealed class DocumentTabColorManager : IVsShellPropertyEvents
   {
     private readonly IServiceProvider _sp;
-    private readonly IVsUIShell _shell;
+    private readonly IVsShell _vsShell;
+    private readonly IVsUIShell _uiShell;
     private readonly IVsMonitorSelection _mon;
     private uint _cookie;
 
-    public DocumentTabColorManager(IServiceProvider sp, IVsUIShell shell, IVsMonitorSelection mon)
+    public DocumentTabColorManager(IServiceProvider sp, IVsShell vsShell, IVsUIShell uiShell, IVsMonitorSelection mon)
     {
-      _sp = sp; _shell = shell; _mon = mon;
+      _sp = sp; _vsShell = vsShell; _uiShell = uiShell; _mon = mon;
     }
 
     public void Hook()
     {
       ThreadHelper.ThrowIfNotOnUIThread();
-      _shell.AdviseShellPropertyChanges(this, out _cookie);
+      if (_vsShell != null)
+      {
+        _vsShell.AdviseShellPropertyChanges(this, out _cookie);
+      }
       RefreshAllOpenFrames();
     }
 
     public void Unhook()
     {
       ThreadHelper.ThrowIfNotOnUIThread();
-      if (_cookie != 0) _shell.UnadviseShellPropertyChanges(_cookie);
+      if (_cookie != 0 && _vsShell != null) _vsShell.UnadviseShellPropertyChanges(_cookie);
     }
 
     public void RefreshAllOpenFrames()
@@ -49,9 +53,11 @@ namespace Abs.Ssms.TabColoring.Services
     private IEnumerable<IVsWindowFrame> EnumerateDocumentFrames()
     {
       ThreadHelper.ThrowIfNotOnUIThread();
-      _shell.GetDocumentWindowEnum(out IEnumWindowFrames e);
+      IEnumWindowFrames e;
+      _uiShell.GetDocumentWindowEnum(out e);
       var arr = new IVsWindowFrame[1];
-      while (e != null && e.Next(1, arr, out uint fetched) == VSConstants.S_OK && fetched == 1)
+      uint fetched;
+      while (e != null && e.Next(1, arr, out fetched) == VSConstants.S_OK && fetched == 1)
         yield return arr[0];
     }
 
@@ -60,7 +66,9 @@ namespace Abs.Ssms.TabColoring.Services
       ThreadHelper.ThrowIfNotOnUIThread();
 
       var s = SettingsService.Current;
-      var (server, db) = ConnectionInfoResolver.TryGetConnectionForFrame(frame);
+      var conn = ConnectionInfoResolver.TryGetConnectionForFrame(frame);
+      var server = conn.server;
+      var db = conn.database;
 
       var color = PickColor(s, server, db);
       var key = ColorRegistry.GetFrameKey(frame);
@@ -90,29 +98,23 @@ namespace Abs.Ssms.TabColoring.Services
       foreach (var r in rules)
       {
         bool match = false;
-        var p = (r.Pattern ?? string.Empty).ToLowerInvariant();
+        string p = (r.Pattern ?? string.Empty).ToLowerInvariant();
         if (s.UseRegex)
         {
           try
           {
             var rx = new Regex(r.Pattern, RegexOptions.IgnoreCase);
-            match = r.Scope switch
-            {
-              RuleScope.ServerOnly => rx.IsMatch(hayServer),
-              RuleScope.DatabaseOnly => rx.IsMatch(hayDb),
-              _ => rx.IsMatch(both)
-            };
+            if (r.Scope == RuleScope.ServerOnly) match = rx.IsMatch(hayServer);
+            else if (r.Scope == RuleScope.DatabaseOnly) match = rx.IsMatch(hayDb);
+            else match = rx.IsMatch(both);
           }
           catch { }
         }
         else
         {
-          match = r.Scope switch
-          {
-            RuleScope.ServerOnly => hayServer.Contains(p),
-            RuleScope.DatabaseOnly => hayDb.Contains(p),
-            _ => both.Contains(p)
-          };
+          if (r.Scope == RuleScope.ServerOnly) match = hayServer.Contains(p);
+          else if (r.Scope == RuleScope.DatabaseOnly) match = hayDb.Contains(p);
+          else match = both.Contains(p);
         }
 
         if (match) return r.Color;

@@ -51,12 +51,14 @@ namespace Abs.Ssms.TabColoring.Options
       {
         if (grid.CurrentRow?.DataBoundItem is Rule r)
         {
-          using var dlg = new ColorDialog();
-          dlg.Color = System.Drawing.ColorTranslator.FromHtml(r.ColorHex);
-          if (dlg.ShowDialog() == DialogResult.OK)
+          using (var dlg = new ColorDialog())
           {
-            r.ColorHex = ColorTranslator.ToHtml(dlg.Color);
-            grid.Refresh();
+            dlg.Color = System.Drawing.ColorTranslator.FromHtml(r.ColorHex);
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+              r.ColorHex = ColorTranslator.ToHtml(dlg.Color);
+              grid.Refresh();
+            }
           }
         }
       };
