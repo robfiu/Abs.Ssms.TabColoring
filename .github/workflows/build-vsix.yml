@@ -16,18 +16,28 @@ jobs:
       with:
         msbuild-architecture: x64
 
-    - name: Ensure VSSDK (installs VS component)
+    - name: Ensure VSSDK (install VS component)
       shell: pwsh
       run: |
-        $vsPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        if (-not (Test-Path $vswhere)) { throw "vswhere.exe not found" }
+
+        # Ścieżka do zainstalowanego Visual Studio
+        $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
         if (-not $vsPath) { throw "Visual Studio not found" }
-        & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify `
-          --installPath $vsPath `
-          --add Microsoft.VisualStudio.Component.VSSDK `
-          --quiet --norestart --nocache
-        # sprawdźmy czy pliki targetów są na miejscu
-        $targets = Join-Path $env:ProgramFiles(x86) "Microsoft Visual Studio\*\*\VSSDK\Microsoft.VsSDK.targets"
-        Get-ChildItem $targets -ErrorAction SilentlyContinue | Select-Object -First 1 -Expand FullName
+        Write-Host "VS installation path: $vsPath"
+
+        # Doinstaluj komponent VSSDK (cicho)
+        $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+        & $installer modify --installPath "$vsPath" --add Microsoft.VisualStudio.Component.VSSDK --quiet --norestart --nocache
+
+        # Sprawdź, czy cele VSSDK są dostępne (2 typowe lokalizacje)
+        $targets1 = Join-Path $vsPath "MSBuild\Microsoft\VisualStudio\v17.0\VSSDK\Microsoft.VsSDK.targets"
+        $targets2 = Join-Path $vsPath "Common7\IDE\CommonExtensions\Microsoft\VSSDK\Microsoft.VsSDK.targets"
+        if (Test-Path $targets1) { Write-Host "Found VSSDK targets: $targets1" }
+        elseif (Test-Path $targets2) { Write-Host "Found VSSDK targets: $targets2" }
+        else { Write-Warning "VSSDK targets not found yet (installer may still be finalizing). Build should still find them via MSBuildExtensionsPath." }
+        
 
     - name: Restore (solution)
       run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m
