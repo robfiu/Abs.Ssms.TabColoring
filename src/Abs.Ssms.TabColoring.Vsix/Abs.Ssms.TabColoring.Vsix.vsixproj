@@ -6,35 +6,32 @@
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <VisualStudioVersion>17.0</VisualStudioVersion>
     <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
     <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
-  <!-- 1) PROPS: najpierw spróbuj z NuGet (BuildTools), potem z VS -->
-  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
-          Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.props')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v17.0\VSSDK\Microsoft.VsSDK.props"
-          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v17.0\VSSDK\Microsoft.VsSDK.props')" />
+  <!-- PROPS z zainstalowanego VS (VSSDK) -->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.props"
+          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.props')" />
 
   <ItemGroup>
-    <!-- Manifest VSIX w tym projekcie -->
+    <!-- Ten manifest leży obok .vsixproj -->
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Referencja do biblioteki z rozszerzeniem; dołącz DLL i PKGDEF -->
+    <!-- Biblioteka z Twoim kodem; wciągamy DLL i PKGDEF -->
     <ProjectReference Include="..\Abs.Ssms.TabColoring\Abs.Ssms.TabColoring.csproj">
       <Name>Abs.Ssms.TabColoring</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup;PkgdefProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
 
-  <!-- 2) TARGETS: z NuGet (BuildTools) albo z Visual Studio -->
-  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
-          Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v17.0\VSSDK\Microsoft.VsSDK.targets"
-          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v17.0\VSSDK\Microsoft.VsSDK.targets')" />
+  <!-- TARGETS z zainstalowanego VS (VSSDK) -->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets"
+          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets')" />
 </Project>

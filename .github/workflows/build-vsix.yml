@@ -16,7 +16,7 @@ jobs:
       with:
         msbuild-architecture: x64
 
-    - name: Ensure VSSDK component is installed (Visual Studio 2022)
+    - name: Ensure VSSDK (installs VS component)
       shell: pwsh
       run: |
         $vsPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
@@ -25,18 +25,20 @@ jobs:
           --installPath $vsPath `
           --add Microsoft.VisualStudio.Component.VSSDK `
           --quiet --norestart --nocache
-        Write-Host "VSSDK ensured at: $vsPath"
+        # sprawdźmy czy pliki targetów są na miejscu
+        $targets = Join-Path $env:ProgramFiles(x86) "Microsoft Visual Studio\*\*\VSSDK\Microsoft.VsSDK.targets"
+        Get-ChildItem $targets -ErrorAction SilentlyContinue | Select-Object -First 1 -Expand FullName
 
     - name: Restore (solution)
       run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m
 
     - name: Build VSIX project (Release) + BINLOG
-      run: msbuild src\Abs.Ssms.TabColoring.Vsix\Abs.Ssms.TabColoring.Vsix.vsixproj `
-                  /p:Configuration=Release /m /v:m /bl:msbuild.binlog
+      run: msbuild "src\Abs.Ssms.TabColoring.Vsix\Abs.Ssms.TabColoring.Vsix.vsixproj" /p:Configuration=Release /m /v:m /bl:msbuild.binlog
 
     - name: Show outputs (debug)
       shell: pwsh
       run: |
+        Write-Host "=== VSIX under VSIX project bin ==="
         Get-ChildItem -Path src/Abs.Ssms.TabColoring.Vsix/bin/Release -Recurse -ErrorAction SilentlyContinue | 
           Format-Table FullName, Length
         Write-Host "=== Find *.vsix anywhere ==="
@@ -51,3 +53,5 @@ jobs:
         path: |
           **/*.vsix
           msbuild.binlog
+
+
