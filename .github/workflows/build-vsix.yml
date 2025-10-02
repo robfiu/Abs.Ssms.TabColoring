@@ -16,24 +16,32 @@ jobs:
       with:
         msbuild-architecture: x64
 
-    - name: NuGet restore (solution)
+    - name: Ensure VSSDK component is installed (Visual Studio 2022)
+      shell: pwsh
+      run: |
+        $vsPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+        if (-not $vsPath) { throw "Visual Studio not found" }
+        & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify `
+          --installPath $vsPath `
+          --add Microsoft.VisualStudio.Component.VSSDK `
+          --quiet --norestart --nocache
+        Write-Host "VSSDK ensured at: $vsPath"
+
+    - name: Restore (solution)
       run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m
 
-    - name: Build (Release) + BINLOG
-      run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:m /bl:msbuild.binlog /p:GenerateVsixContainer=true /p:CreateVsixContainer=true
+    - name: Build VSIX project (Release) + BINLOG
+      run: msbuild src\Abs.Ssms.TabColoring.Vsix\Abs.Ssms.TabColoring.Vsix.vsixproj `
+                  /p:Configuration=Release /m /v:m /bl:msbuild.binlog
 
     - name: Show outputs (debug)
       shell: pwsh
       run: |
-        Write-Host "=== DIR bin\Release ==="
-        Get-ChildItem -Path src/Abs.Ssms.TabColoring/bin/Release -Recurse -ErrorAction SilentlyContinue | Format-Table FullName, Length
+        Get-ChildItem -Path src/Abs.Ssms.TabColoring.Vsix/bin/Release -Recurse -ErrorAction SilentlyContinue | 
+          Format-Table FullName, Length
         Write-Host "=== Find *.vsix anywhere ==="
         Get-ChildItem -Path . -Recurse -Filter *.vsix -ErrorAction SilentlyContinue | ForEach-Object {
           Write-Host "FOUND VSIX: $($_.FullName)"
-        }
-        Write-Host "=== Find *.pkgdef (diagnostic) ==="
-        Get-ChildItem -Path . -Recurse -Filter *.pkgdef -ErrorAction SilentlyContinue | ForEach-Object {
-          Write-Host "FOUND PKGDEF: $($_.FullName)"
         }
 
     - name: Upload VSIX + binlog
@@ -42,6 +50,4 @@ jobs:
         name: vsix-and-logs
         path: |
           **/*.vsix
-          **/*.pkgdef
           msbuild.binlog
-
