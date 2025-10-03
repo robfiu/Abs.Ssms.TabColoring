@@ -27,7 +27,8 @@ jobs:
 
       # Budujemy całe solution, żeby $(SolutionDir) było ustawione i importy z packages działały
       - name: Build solution (Release) + BINLOG
-        run: msbuild Abs.Ssms.TabColoring.sln /t:Rebuild /p:Configuration=Release /m /v:m /bl:msbuild.binlog
+        run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /m /v:m /bl:msbuild.binlog
+
 
       - name: Show outputs (debug)
         shell: pwsh
