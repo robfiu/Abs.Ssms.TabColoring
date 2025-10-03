@@ -2,8 +2,11 @@
 <Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <!-- UŻYJ swojego GUID z .sln / .vsixproj -->
     <ProjectGuid>{7F1E3F8B-7D5D-4E9E-9B8F-BAE2E5E6C9A1}</ProjectGuid>
+
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
+    <VisualStudioVersion>17.0</VisualStudioVersion>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
 
     <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
@@ -14,30 +17,51 @@
     <OutputType>Library</OutputType>
     <DeployExtension>false</DeployExtension>
 
-    <!-- Ścieżki wyjściowe zdefiniowane ręcznie (bez Microsoft.Common.*) -->
+    <!-- jawne ścieżki wyjściowe -->
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
-
-    <!-- Katalog 'packages' względem solution (budujemy solution) -->
-    <PackagesDir>$(SolutionDir)packages\</PackagesDir>
   </PropertyGroup>
 
-  <!-- VSSDK BuildTools z packages.config (definiują Build, CreateVsixContainer itd.) -->
-  <Import Project="$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
-          Condition="Exists('$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props')" />
+  <!-- === PROPS: 3 możliwe lokalizacje VSSDK (dowolna, która istnieje) === -->
+  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
+          Condition="'$(NuGetPackageRoot)' != '' and Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.props')" />
+  <Import Project="$(SolutionDir)packages\Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
+          Condition="Exists('$(SolutionDir)packages\Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props')" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.props"
+          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.props')" />
 
   <ItemGroup>
     <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Dociągamy DLL i PKGDEF z projektu biblioteki -->
     <ProjectReference Include="..\Abs.Ssms.TabColoring\Abs.Ssms.TabColoring.csproj">
       <Name>Abs.Ssms.TabColoring</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup;PkgdefProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
 
-  <Import Project="$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
-          Condition="Exists('$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets')" />
+  <!-- === TARGETS: 3 możliwe lokalizacje === -->
+  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
+          Condition="'$(NuGetPackageRoot)' != '' and Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets')" />
+  <Import Project="$(SolutionDir)packages\Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
+          Condition="Exists('$(SolutionDir)packages\Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets"
+          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets')" />
+
+  <!-- === Zapewnij, że projekt ma cele Build/Rebuild (bez Microsoft.Common.*) === -->
+  <Target Name="Build">
+    <!-- jeżeli importy VSSDK są dostępne, ten target istnieje i wykona pakowanie -->
+    <CallTarget Targets="CreateVsixContainer" />
+  </Target>
+
+  <Target Name="Rebuild">
+    <CallTarget Targets="Build" />
+  </Target>
+
+  <Target Name="Clean">
+    <RemoveDir Directories="$(OutputPath)" />
+    <RemoveDir Directories="$(IntermediateOutputPath)" />
+  </Target>
 </Project>
