@@ -6,58 +6,38 @@
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
 
-    <!-- Domyślna konfiguracja/platf. gdy projekt budowany w solution -->
     <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
     <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
 
     <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
     <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
     <OutputType>Library</OutputType>
-
-    <!-- Na agentach CI nie próbuj deployować -->
     <DeployExtension>false</DeployExtension>
 
-    <!-- Katalog 'packages' względem pliku .sln (Wariant A) -->
+    <!-- Ścieżki wyjściowe zdefiniowane ręcznie (bez Microsoft.Common.*) -->
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+
+    <!-- Katalog 'packages' względem solution (budujemy solution) -->
     <PackagesDir>$(SolutionDir)packages\</PackagesDir>
   </PropertyGroup>
 
-  <!-- 1) Wczytaj domyślne propsy MSBuild (ustawiają m.in. BaseOutputPath/OutputPath) -->
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-
-  <!-- 2) Ustal OUTPUT PATH per konfiguracja/platf. -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>bin\Debug\</OutputPath>
-    <IntermediateOutputPath>obj\Debug\</IntermediateOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <IntermediateOutputPath>obj\Release\</IntermediateOutputPath>
-  </PropertyGroup>
-
-  <!-- 3) PROPS/TARGETS z VSSDK BuildTools (packages.config w tym projekcie) -->
+  <!-- VSSDK BuildTools z packages.config (definiują Build, CreateVsixContainer itd.) -->
   <Import Project="$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
           Condition="Exists('$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props')" />
 
   <ItemGroup>
-    <!-- Manifest VSIX (plik obok .vsixproj) -->
     <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Biblioteka z Twoim kodem; dołącz DLL i PKGDEF do paczki -->
     <ProjectReference Include="..\Abs.Ssms.TabColoring\Abs.Ssms.TabColoring.csproj">
       <Name>Abs.Ssms.TabColoring</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup;PkgdefProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
 
-  <!-- Standardowe targets MSBuild -->
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
-
-  <!-- Targets VSSDK z BuildTools (generują VSIX) -->
   <Import Project="$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
           Condition="Exists('$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets')" />
-
 </Project>

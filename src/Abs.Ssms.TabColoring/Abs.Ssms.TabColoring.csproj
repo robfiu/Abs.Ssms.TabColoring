@@ -45,12 +45,6 @@
     <VSIXSourceItem Include="source.extension.vsixmanifest" />
   </ItemGroup>
 
-  <!-- JAWNE importy BuildTools (gdyby automatyczny import z NuGet był pominięty) -->
-  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props"
-          Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props')" />
-  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets"
-          Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets')" />
-
   <!-- Po kompilacji WYMUSZ pakowanie i wypisz ścieżkę -->
   <Target Name="AfterBuild">
     <Message Text="CreateVsixContainer: VsixOutputPath=$(VsixOutputPath)" Importance="high" />
