@@ -51,4 +51,18 @@
     <CallTarget Targets="CreateVsixContainer" />
     <Message Text="VSIX expected at $(VsixOutputPath)\$(AssemblyName).vsix" Importance="high" />
   </Target>
+  
+<!-- WYMUSZENIE importu targetów BuildTools dla tego projektu (nawet jeśli nuget zrobi to już raz).
+     Jeśli pojawi się ostrzeżenie MSB4011 "cannot be imported again" – zignoruj, to tylko warning. -->
+  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props"
+        Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props')" />
+  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets"
+        Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets')" />  
 </Project>
+
+
+
+
+
+
+
