@@ -2,7 +2,8 @@
 <Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <ProjectGuid>{7F1E3F8B-7D5D-4E9E-9B8F-BAE2E5E6C9A1}</ProjectGuid>  <!-- Użyj swojego GUID z .sln -->
+    <!-- UŻYJ tego samego GUID co w .sln -->
+    <ProjectGuid>{7F1E3F8B-7D5D-4E9E-9B8F-BAE2E5E6C9A1}</ProjectGuid>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
     <VisualStudioVersion>17.0</VisualStudioVersion>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -10,24 +11,26 @@
     <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
     <Platform Condition="'$(Platform)'==''">Any CPU</Platform>
 
-    <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
-    <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
-    <OutputType>Library</OutputType>
+    <!-- VSIX nie jest biblioteką: nie ustawiamy AssemblyName/OutputType -->
+    <RootNamespace>Abs.Ssms.TabColoring.Vsix</RootNamespace>
     <DeployExtension>false</DeployExtension>
 
     <!-- jawne ścieżki wyjściowe -->
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
 
+    <!-- klucz: nie próbuj kopiować "produktu budowania" dla VSIX -->
+    <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
+
     <!-- katalog packages względem solution (budujemy solution) -->
     <PackagesDir>$(SolutionDir)packages\</PackagesDir>
   </PropertyGroup>
 
-  <!-- 1) DOMYŚLNE PROPS (zapewniają m.in. AssignProjectConfiguration) -->
+  <!-- Domyślne props (dają AssignProjectConfiguration) -->
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
           Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
-  <!-- 2) VSSDK PROPS (z BuildTools / NuGet lub z VS) -->
+  <!-- VSSDK props z BuildTools lub z VS -->
   <Import Project="$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
           Condition="Exists('$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.props')" />
   <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.props"
@@ -47,14 +50,14 @@
     </ProjectReference>
   </ItemGroup>
 
-  <!-- 3) DOMYŚLNE TARGETS (tu buduje się łańcuch BuildDependsOn z CoreCompile) -->
+  <!-- Domyślne targets (potrzebny łańcuch BuildDependsOn) -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 
-  <!-- 4) STUBY: zaspokajamy wywołania z Common.targets (projekt VSIX nic nie kompiluje) -->
+  <!-- Stuby: VSIX nic nie kompiluje, więc zaspokajamy wywołania z Common.targets -->
   <Target Name="CreateManifestResourceNames" />
   <Target Name="CoreCompile" />
 
-  <!-- 5) VSSDK TARGETS (pakują VSIX) -->
+  <!-- VSSDK targets (pakują VSIX) -->
   <Import Project="$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
           Condition="Exists('$(PackagesDir)Microsoft.VSSDK.BuildTools.17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets')" />
   <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\tools\VSSDK\Microsoft.VsSDK.targets"
