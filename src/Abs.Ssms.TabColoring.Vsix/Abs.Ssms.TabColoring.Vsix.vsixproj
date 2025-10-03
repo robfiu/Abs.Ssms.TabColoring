@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="17.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <ProjectGuid>{7F1E3F8B-7D5D-4E9E-9B8F-BAE2E5E6C9A1}</ProjectGuid>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <VisualStudioVersion>17.0</VisualStudioVersion>
-    <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
-    <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
-
-  <!-- PROPS z zainstalowanego VS (VSSDK) -->
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.props"
-          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.props')" />
-
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <!-- Ten manifest leży obok .vsixproj -->
-    <None Include="source.extension.vsixmanifest">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Biblioteka z Twoim kodem; wciągamy DLL i PKGDEF -->
+    <!-- Referencja do biblioteki z kodem rozszerzenia -->
     <ProjectReference Include="..\Abs.Ssms.TabColoring\Abs.Ssms.TabColoring.csproj">
       <Name>Abs.Ssms.TabColoring</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup;PkgdefProjectOutputGroup</IncludeOutputGroupsInVSIX>
+      <Private>false</Private>
     </ProjectReference>
+
+    <!-- Manifest VSIX + (opcjonalnie) ikony/baner -->
+    <None Include="source.extension.vsixmanifest" />
+    <!-- Przykładowe assety graficzne (jeśli masz):
+    <Content Include="Assets\icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    -->
   </ItemGroup>
 
-  <!-- TARGETS z zainstalowanego VS (VSSDK) -->
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets"
-          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+
+    <!-- To powoduje, że output DLL z projektu .csproj trafi do paczki VSIX -->
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+
+    <!-- Pozwala ładować MEF z folderu rozszerzenia -->
+    <UseCodebase>true</UseCodebase>
+  </PropertyGroup>
+
+  <!-- Klasyczny MSBuild (NIE dodawaj atrybutu Sdk="...") -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+
+  <!-- Główne cele VSIX – dostępne na runners/windows (VS jest zainstalowany) -->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\VSSDK\Microsoft.VsSDK.targets"
+          Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\VSSDK\Microsoft.VsSDK.targets')" />
+
+  <!-- (opcjonalnie) NuGet BuildTools – pomaga w CI, ale nie zastępuje powyższego importu -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.10.2178" PrivateAssets="all" />
+  </ItemGroup>
 </Project>
