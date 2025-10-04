@@ -5,6 +5,7 @@
     <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
     <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
     <UseWPF>true</UseWPF>
+    <ProjectTypeGuids>{82b43b9e-a664-46ee-b556-e9e16729598a};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
 
     <!-- generowanie paczki VSIX -->
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
