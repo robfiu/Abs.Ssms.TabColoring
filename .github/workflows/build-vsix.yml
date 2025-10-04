@@ -20,7 +20,7 @@ jobs:
       run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m
 
     - name: Build (Release) + BINLOG
-      run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:m /bl:msbuild.binlog /p:GenerateVsixContainer=true /p:CreateVsixContainer=true
+      run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:detailed /bl:msbuild.binlog /p:GenerateVsixContainer=true /p:CreateVsixContainer=true
 
     - name: Show outputs (debug)
       shell: pwsh
