@@ -1,8 +1,6 @@
 name: Build VSIX
-
 on:
-  push:
-    branches: [ main, master ]
+  push: { branches: [ main, master ] }
   workflow_dispatch:
 
 jobs:
@@ -10,42 +8,40 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
+    - name: NuGet restore (solution)
+      run: msbuild Abs.Ssms.TabColoring.sln /t:Restore /m /v:m
 
-      # Ważne: klasyczny restore dla packages.config (VSIX wrapper korzysta z BuildTools z katalogu "packages")
-      - name: NuGet restore (solution)
-        run: nuget restore Abs.Ssms.TabColoring.sln
+    - name: Build (Release) + BINLOG
+      run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:detailed /bl:msbuild.binlog /p:GenerateVsixContainer=true /p:CreateVsixContainer=true
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-        with:
-          msbuild-architecture: x64
+    - name: Show outputs (debug)
+      shell: pwsh
+      run: |
+        Write-Host "=== DIR bin\Release ==="
+        Get-ChildItem -Path src/Abs.Ssms.TabColoring/bin/Release -Recurse -ErrorAction SilentlyContinue | Format-Table FullName, Length
+        Write-Host "=== Find *.vsix anywhere ==="
+        Get-ChildItem -Path . -Recurse -Filter *.vsix -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "FOUND VSIX: $($_.FullName)"
+        }
+        Write-Host "=== Find *.pkgdef (diagnostic) ==="
+        Get-ChildItem -Path . -Recurse -Filter *.pkgdef -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "FOUND PKGDEF: $($_.FullName)"
+        }
 
-      # Budujemy całe solution, żeby $(SolutionDir) było ustawione i importy z packages działały
-      - name: Build solution (Release) + BINLOG
-        run: msbuild Abs.Ssms.TabColoring.sln /t:Build /p:Configuration=Release /m /v:m /bl:msbuild.binlog
+    - name: Upload VSIX + binlog
+      uses: actions/upload-artifact@v4
+      with:
+        name: vsix-and-logs
+        path: |
+          **/*.vsix
+          **/*.pkgdef
+          msbuild.binlog
 
-
-      - name: Show outputs (debug)
-        shell: pwsh
-        run: |
-          Write-Host "=== Files in VSIX project bin/Release ==="
-          Get-ChildItem -Path src/Abs.Ssms.TabColoring.Vsix/bin/Release -Recurse -ErrorAction SilentlyContinue |
-            Format-Table FullName, Length
-          Write-Host "=== Find *.vsix anywhere ==="
-          Get-ChildItem -Path . -Recurse -Filter *.vsix -ErrorAction SilentlyContinue |
-            ForEach-Object { Write-Host "FOUND VSIX: $($_.FullName)" }
-
-      - name: Upload VSIX + binlog
-        uses: actions/upload-artifact@v4
-        with:
-          name: vsix-and-logs
-          path: |
-            **/*.vsix
-            msbuild.binlog
-          if-no-files-found: error

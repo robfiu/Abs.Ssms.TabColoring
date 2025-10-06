@@ -5,14 +5,14 @@
     <RootNamespace>Abs.Ssms.TabColoring</RootNamespace>
     <AssemblyName>Abs.Ssms.TabColoring</AssemblyName>
     <UseWPF>true</UseWPF>
+    <ProjectTypeGuids>{82b43b9e-a664-46ee-b556-e9e16729598a};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
 
-    <!-- GENEROWANIE VSIX i PKGDEF -->
+    <!-- generowanie paczki VSIX -->
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <GenerateVsixContainer>true</GenerateVsixContainer>
-
-    <!-- gdzie ma trafić VSIX -->
-    <VsixOutputPath>$(MSBuildProjectDirectory)\bin\$(Configuration)</VsixOutputPath>
+    <!-- gdzie ma wylądować VSIX: razem z DLL -->
+    <VsixOutputPath>$(OutputPath)</VsixOutputPath>
 
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
@@ -21,9 +21,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Pin wersji: żeby importy poniżej trafiły w ścieżkę -->
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.9.37000" ExcludeAssets="runtime" />
-    <!-- WERSJĘ dopasowujemy do tej, którą i tak rozwiązuje runner (z Twoich logów) -->
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.10.2178"
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.31902"
                       PrivateAssets="all"
                       IncludeAssets="build;buildTransitive" />
   </ItemGroup>
@@ -38,31 +38,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- KLUCZ: poprawny item rozpoznawany przez BuildTools -->
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-    <VSIXSourceItem Include="source.extension.vsixmanifest" />
+    <!-- ważne: item rozpoznawany przez BuildTools -->
+    <VsixManifest Include="source.extension.vsixmanifest" />
   </ItemGroup>
 
-  <!-- Po kompilacji WYMUSZ pakowanie i wypisz ścieżkę -->
+  <!-- jawny import build-targetów z cache NuGet na runnerze -->
+  <Import Project="$(NuGetPackageRoot)Microsoft.VSSDK.BuildTools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props"
+          Condition="Exists('$(NuGetPackageRoot)Microsoft.VSSDK.BuildTools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props')" />
+  <Import Project="$(NuGetPackageRoot)Microsoft.VSSDK.BuildTools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets"
+          Condition="Exists('$(NuGetPackageRoot)Microsoft.VSSDK.BuildTools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets')" />
+
+  <!-- po kompilacji: wymuś zbudowanie paczki -->
   <Target Name="AfterBuild">
-    <Message Text="CreateVsixContainer: VsixOutputPath=$(VsixOutputPath)" Importance="high" />
     <CallTarget Targets="CreateVsixContainer" />
-    <Message Text="VSIX expected at $(VsixOutputPath)\$(AssemblyName).vsix" Importance="high" />
   </Target>
-  
-<!-- WYMUSZENIE importu targetów BuildTools dla tego projektu (nawet jeśli nuget zrobi to już raz).
-     Jeśli pojawi się ostrzeżenie MSB4011 "cannot be imported again" – zignoruj, to tylko warning. -->
-  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props"
-        Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.props')" />
-  <Import Project="$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets"
-        Condition="Exists('$(NuGetPackageRoot)microsoft.vssdk.buildtools\17.10.2178\build\Microsoft.VSSDK.BuildTools.targets')" />  
 </Project>
-
-
-
-
-
-
-
